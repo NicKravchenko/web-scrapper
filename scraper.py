@@ -1,36 +1,51 @@
 import requests
 from bs4 import BeautifulSoup
-import re
+import io, json
 
-base_url = "https://en.wikipedia.org/"
+from helper_functions import readFile, writeFile
 
-detail_url = "wiki/Lists_of_universities_and_colleges_by_country"
+universities = {}
 
+base_url = "https://en.wikipedia.org"
+detail_url = "/wiki/Lists_of_universities_and_colleges_by_country"
 url = base_url + detail_url
 
+
+file_universities = readFile("data/universities.json")
+countries = readFile("data/countries.json")
+
 response = requests.get(url)
-universities = {}
+
 if response.status_code == 200:
     soup = BeautifulSoup(response.content, "html.parser")
+
     for link in soup.find_all("a"):
-        a = link.get("href")
+        href = link.get("href")
         title = link.get("title")
 
-        # print("Link: " + str(link))
-        # print("a: " + str(a))
-        # print("title: " + str(title))
-
-        if str(a).startswith("/wiki") and str(title).startswith(
+        if str(href).startswith("/wiki") and str(title).startswith(
             "List of universities in"
         ):
-            university = str(title).replace("List of universities in ", "")
-            universities[university] = base_url + a
+            universityTitle = str(title).replace(
+                "List of universities in ", ""
+            )
 
-            # print(university + " - " + base_url + a)
+            if universityTitle.startswith("the "):
+                universityTitle = universityTitle[4:]
 
-    print(universities)
-    # print(link.get("href"))
-    # print(soup.prettify())
-    # print(response.content)
+            link = base_url + href
+
+            if (
+                universityTitle not in file_universities
+                and universityTitle in countries.values()
+            ):
+                universities[universityTitle] = link
+
 else:
     print("Error: Could not fetch content")
+
+aDict = file_universities | universities
+
+writeFile("data/universities.json", aDict)
+
+print(universities)

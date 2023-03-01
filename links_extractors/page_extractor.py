@@ -1,7 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 import io, json
-from ..helper_functions import readFile, writeFile
+from helper_functions import readFile, writeFile
 
 base_url = "https://en.wikipedia.org"
 

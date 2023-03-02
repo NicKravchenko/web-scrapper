@@ -6,8 +6,10 @@ from helper_functions import (
     writeFile,
     return_clean_link,
     cleanify_soup_text,
+    bcolors,
 )
 
+MAX_PER_UNI = 100
 
 intec_json = readFile("data/intec.json")
 
@@ -23,26 +25,65 @@ unis_all_links = readFile("data/unis_all_links.json")
 
 def get_links(base_url, detail_url, session, unis_all_links):
     """Get rid of http or https"""
-    url = base_url + detail_url
+    response = None
+
+    if ("http://" in detail_url) or ("https://" in detail_url):
+        url = detail_url
+    else:
+        url = base_url + detail_url
+
     url_no_http = return_clean_link(url)
-    response = session.get(url)
 
-    if response.status_code == 200:
-        soup = BeautifulSoup(response.content, "html.parser")
+    try:
+        response = session.get(url)
+        # Process the response here...
+    except requests.exceptions.RequestException:
+        # Ignore any errors and continue to the next URL
+        pass
 
-        for a in soup.find_all("a"):
-            href = str(a.get("href"))
-            """Add href only if its relative path or it contains name of page"""
-            if href[:1] == "/" or (url_no_http in href):
+    if not response or response.status_code != 200:
+        print(bcolors.FAIL + "Error on consuming: " + url + bcolors.ENDC)
+        return
+    soup = BeautifulSoup(response.content, "html.parser")
+
+    for a in soup.find_all("a"):
+        href = str(a.get("href"))
+        """Add href only if its relative path or it contains name of page"""
+        if not (
+            href[:1] == "/" or ("http://" in href) or ("https://" in href)
+        ):
+            continue
+
+        composed_url = base_url + href
+
+        if base_url[-1] == "/":
+            if href[0] == "/":
+                href = href[1:]
                 composed_url = base_url + href
-                if composed_url not in unis_all_links[base_url]:
-                    print(composed_url)
 
-                    unis_all_links[base_url].append(composed_url)
+        if ("http://" in href) or ("https://" in href):
+            composed_url = href
 
-                    writeFile("data/unis_all_links.json", unis_all_links)
+        if composed_url in unis_all_links[base_url]:
+            print(
+                bcolors.WARNING
+                + "Skipped recursivamente With Base: "
+                + base_url
+                + " Detail : "
+                + detail_url
+                + bcolors.ENDC
+            )
+            # get_links(base_url, href, session, unis_all_links)
+            continue
 
-                    get_links(base_url, href, session, unis_all_links)
+        unis_all_links[base_url].append(composed_url)
+
+        writeFile("data/unis_all_links.json", unis_all_links)
+        print(bcolors.OKGREEN + "Was saved " + composed_url + bcolors.ENDC)
+        print(len(unis_all_links[base_url]))
+        if len(unis_all_links[base_url]) > MAX_PER_UNI:
+            continue
+        get_links(base_url, href, session, unis_all_links)
 
 
 def decompose_page(url, session):
@@ -75,9 +116,9 @@ def decompose_page(url, session):
 
         intec_json[url]["body"] = text
 
-        print(text)
-        print(intec_json)
-        print(links)
+        # print(text)
+        # print(intec_json)
+        # print(links)
 
 
 try:
@@ -92,18 +133,17 @@ try:
     session.verify = cert_path
 
     for uni in uni_links:
-        # base_url = uni_links[uni]
-        # print(uni)
-        # url = "https://github.com/4teamwork/ftw.linkchecker/issues/57"
+        base_url = uni_links[uni]
         # base_url = "http://www.intec.edu.do"
-        base_url = "http://www.au.edu.az/"
-        unis_all_links[base_url] = []
+        if base_url not in unis_all_links:
+            unis_all_links[base_url] = []
 
         get_links(base_url, "", session, unis_all_links)
         writeFile("data/unis_all_links.json", unis_all_links)
 
-        break
-
 
 except Exception as e:
+    print("Closed with error:")
     print(e)
+    e.with_traceback(None)
+    print(arg for arg in e.args)

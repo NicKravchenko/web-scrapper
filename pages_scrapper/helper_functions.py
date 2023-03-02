@@ -31,3 +31,15 @@ def cleanify_soup_text(soup_text) -> str:
     page_text = " ".join(str(soup_text.get_text()).split())
     split_text = re.findall(r"\b\w+\b", str(page_text))
     return " ".join(split_text)
+
+
+class bcolors:
+    HEADER = "\033[95m"
+    OKBLUE = "\033[94m"
+    OKCYAN = "\033[96m"
+    OKGREEN = "\033[92m"
+    WARNING = "\033[93m"
+    FAIL = "\033[91m"
+    ENDC = "\033[0m"
+    BOLD = "\033[1m"
+    UNDERLINE = "\033[4m"

@@ -9,7 +9,7 @@ from helper_functions import (
     bcolors,
 )
 
-MAX_PER_UNI = 1000
+MAX_PER_UNI = 800
 MAX_RECURTION_DEPTH = 20
 intec_json = readFile("data/intec.json")
 

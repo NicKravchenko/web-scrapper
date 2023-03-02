@@ -35,7 +35,7 @@ def get_links(base_url, detail_url, session, unis_all_links):
     url_no_http = return_clean_link(url)
 
     try:
-        response = session.get(url)
+        response = session.get(url, timeout=10)
         # Process the response here...
     except requests.exceptions.RequestException:
         # Ignore any errors and continue to the next URL

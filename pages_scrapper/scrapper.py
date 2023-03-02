@@ -11,7 +11,7 @@ from helper_functions import (
 )
 
 MAX_PER_UNI = 1000
-MAX_RECURTION_DEPTH = 5
+MAX_RECURTION_DEPTH = 20
 intec_json = readFile("data/intec.json")
 
 cert_path = "C:/Users/Nikita/AppData/Local/Programs/Python/Python311/lib/site-packages/certifi/cacert.pem"

@@ -1,2 +1,2 @@
-requests>=2.82.2,<2.83
+requests>=2.28.2,<2.29
 beautifulsoup4>=4.11.2,<4.12

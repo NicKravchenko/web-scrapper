@@ -9,8 +9,8 @@ from helper_functions import (
     bcolors,
 )
 
-MAX_PER_UNI = 800
-MAX_RECURTION_DEPTH = 20
+MAX_PER_UNI = 1000
+MAX_RECURTION_DEPTH = 5
 intec_json = readFile("data/intec.json")
 
 cert_path = "C:/Users/Nikita/AppData/Local/Programs/Python/Python311/lib/site-packages/certifi/cacert.pem"
@@ -140,8 +140,8 @@ try:
     session.verify = cert_path
 
     for uni in uni_links:
-        base_url = uni_links[uni]
-        # base_url = "http://www.intec.edu.do"
+        # base_url = uni_links[uni]
+        base_url = "http://www.intec.edu.do"
         if base_url not in unis_all_links:
             unis_all_links[base_url] = []
 

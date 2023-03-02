@@ -1,4 +1,6 @@
 import requests
+import urllib.parse
+
 from bs4 import BeautifulSoup
 import io, json, os, sys
 from helper_functions import (
@@ -14,7 +16,9 @@ MAX_PER_UNI = 1000
 MAX_RECURTION_DEPTH = 20
 intec_json = readFile("data/intec.json")
 
-cert_path = "C:/Users/Nikita/AppData/Local/Programs/Python/Python311/lib/site-packages/certifi/cacert.pem"
+cert_path = "/etc/ssl/certs/ca-certificates.crt"
+# cert_path = "C:/Users/Nikita/AppData/Local/Programs/Python/Python311/lib/site-packages/certifi/cacert.pem"
+
 headers = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3",
     "Referer": "https://www.google.com/",
@@ -32,6 +36,8 @@ def get_links(base_url, detail_url, session, unis_all_links, recursion_depth):
         url = detail_url
     else:
         url = base_url + detail_url
+
+    url = urllib.parse.quote(url, safe=":/")
 
     url_no_http = return_clean_link(url)
 
@@ -64,6 +70,8 @@ def get_links(base_url, detail_url, session, unis_all_links, recursion_depth):
 
         if ("http://" in href) or ("https://" in href):
             composed_url = href
+
+        composed_url = urllib.parse.quote(composed_url, safe=":/")
 
         response_check_if_404 = session.get(composed_url, timeout=20)
 
@@ -156,6 +164,8 @@ try:
 
         get_links(base_url, "", session, unis_all_links, 0)
         writeFile("data/unis_all_links.json", unis_all_links)
+
+        print("Finished with " + base_url)
 
         break
 

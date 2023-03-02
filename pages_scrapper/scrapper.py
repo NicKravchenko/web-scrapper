@@ -7,6 +7,7 @@ from helper_functions import (
     return_clean_link,
     cleanify_soup_text,
     bcolors,
+    not_allowed_links,
 )
 
 MAX_PER_UNI = 1000
@@ -51,7 +52,7 @@ def get_links(base_url, detail_url, session, unis_all_links, recursion_depth):
         """Add href only if its relative path or it contains name of page"""
         if not (
             href[:1] == "/" or ("http://" in href) or ("https://" in href)
-        ):
+        ) or (any(ext in href for ext in not_allowed_links)):
             continue
 
         composed_url = base_url + href
@@ -64,7 +65,12 @@ def get_links(base_url, detail_url, session, unis_all_links, recursion_depth):
         if ("http://" in href) or ("https://" in href):
             composed_url = href
 
-        if composed_url in unis_all_links[base_url]:
+        response_check_if_404 = session.get(composed_url, timeout=10)
+
+        if (composed_url in unis_all_links[base_url]) or (
+            not response_check_if_404
+            or response_check_if_404.status_code == 404
+        ):
             print(
                 bcolors.WARNING
                 + "Skipped recursivamente With Base: "
@@ -141,12 +147,14 @@ try:
 
     for uni in uni_links:
         # base_url = uni_links[uni]
-        base_url = "http://www.intec.edu.do"
+        base_url = "https://www.intec.edu.do"
         if base_url not in unis_all_links:
             unis_all_links[base_url] = []
 
         get_links(base_url, "", session, unis_all_links, 0)
         writeFile("data/unis_all_links.json", unis_all_links)
+
+        break
 
 
 except Exception as e:
@@ -154,3 +162,5 @@ except Exception as e:
     print(e)
     e.with_traceback(None)
     print(arg for arg in e.args)
+
+    pass

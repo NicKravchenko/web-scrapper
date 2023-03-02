@@ -9,8 +9,8 @@ from helper_functions import (
     bcolors,
 )
 
-MAX_PER_UNI = 100
-
+MAX_PER_UNI = 1000
+MAX_RECURTION_DEPTH = 20
 intec_json = readFile("data/intec.json")
 
 cert_path = "C:/Users/Nikita/AppData/Local/Programs/Python/Python311/lib/site-packages/certifi/cacert.pem"
@@ -23,7 +23,7 @@ uni_links = readFile("data/universities_world.json")
 unis_all_links = readFile("data/unis_all_links.json")
 
 
-def get_links(base_url, detail_url, session, unis_all_links):
+def get_links(base_url, detail_url, session, unis_all_links, recursion_depth):
     """Get rid of http or https"""
     response = None
 
@@ -80,10 +80,17 @@ def get_links(base_url, detail_url, session, unis_all_links):
 
         writeFile("data/unis_all_links.json", unis_all_links)
         print(bcolors.OKGREEN + "Was saved " + composed_url + bcolors.ENDC)
-        print(len(unis_all_links[base_url]))
-        if len(unis_all_links[base_url]) > MAX_PER_UNI:
+        print(
+            "Amount: "
+            + str(len(unis_all_links[base_url]))
+            + " depth "
+            + str(recursion_depth)
+        )
+        if (len(unis_all_links[base_url]) > MAX_PER_UNI) or (
+            recursion_depth > MAX_RECURTION_DEPTH
+        ):
             continue
-        get_links(base_url, href, session, unis_all_links)
+        get_links(base_url, href, session, unis_all_links, recursion_depth + 1)
 
 
 def decompose_page(url, session):
@@ -138,7 +145,7 @@ try:
         if base_url not in unis_all_links:
             unis_all_links[base_url] = []
 
-        get_links(base_url, "", session, unis_all_links)
+        get_links(base_url, "", session, unis_all_links, 0)
         writeFile("data/unis_all_links.json", unis_all_links)
 
 

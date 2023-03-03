@@ -14,7 +14,10 @@ from helper_functions import (
 
 MAX_PER_UNI = 1000
 MAX_RECURTION_DEPTH = 20
-intec_json = readFile("data/intec.json")
+# data_intec_json = "data/intec.json"
+# absolute_path_intec_json = os.path.abspath(data_intec_json)
+
+# intec_json = readFile("data/intec.json")
 
 cert_path = "/etc/ssl/certs/ca-certificates.crt"
 # cert_path = "C:/Users/Nikita/AppData/Local/Programs/Python/Python311/lib/site-packages/certifi/cacert.pem"
@@ -24,8 +27,13 @@ headers = {
     "Referer": "https://www.google.com/",
 }
 
-uni_links = readFile("data/universities_world.json")
-unis_all_links = readFile("data/unis_all_links.json")
+relat_all_links = "data/universities_world.json"
+unis_all_links = os.path.abspath(relat_all_links)
+uni_links = readFile(unis_all_links)
+
+relat_unis_all_links = "data/unis_all_links.json"
+unis_unis_all_links = os.path.abspath(relat_unis_all_links)
+unis_all_links = readFile(unis_unis_all_links)
 
 
 def get_links(base_url, detail_url, session, unis_all_links, recursion_depth):
@@ -132,10 +140,10 @@ def decompose_page(url, session):
             for h in soup.find_all(f"h{i}"):
                 hList[i].append(h.text)
 
-        intec_json[url] = {}
-        intec_json[url]["header"] = hList
+        # intec_json[url] = {}
+        # intec_json[url]["header"] = hList
 
-        intec_json[url]["body"] = text
+        # intec_json[url]["body"] = text
 
         # print(text)
         # print(intec_json)

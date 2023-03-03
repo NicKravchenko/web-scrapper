@@ -1,7 +1,8 @@
-import json, re
+import json, re, os
 
 
-def readFile(route):
+def readFile(route_relat):
+    route = os.path.abspath(route_relat)
     fileObject = open(route, "r")
     jsonContent = fileObject.read()
     readed = json.loads(jsonContent)
@@ -9,8 +10,9 @@ def readFile(route):
     return readed
 
 
-def writeFile(route, content):
+def writeFile(route_relat, content):
     jsonString = json.dumps(content)
+    route = os.path.abspath(route_relat)
 
     jsonFile = open(route, "w")
     jsonFile.write(jsonString)

@@ -84,7 +84,12 @@ def get_links(base_url, detail_url, session, unis_all_links, recursion_depth):
 
         composed_url = urllib.parse.quote(composed_url, safe=":/")
 
-        response_check_if_404 = session.get(composed_url, timeout=20)
+        try:
+            response_check_if_404 = session.get(composed_url, timeout=20)
+            # Process the response here...
+        except requests.exceptions.RequestException:
+            # Ignore any errors and continue to the next URL
+            continue
 
         if (composed_url in unis_all_links[base_url]) or (
             not response_check_if_404

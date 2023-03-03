@@ -27,14 +27,16 @@ headers = {
     "Referer": "https://www.google.com/",
 }
 
-relat_all_links = "data/universities_world.json"
-unis_all_links = os.path.abspath(relat_all_links)
-print(unis_all_links)
-uni_links = readFile(unis_all_links)
 
-relat_unis_all_links = "data/unis_all_links.json"
-unis_unis_all_links = os.path.abspath(relat_unis_all_links)
-unis_all_links = readFile(unis_unis_all_links)
+__dir__ = os.path.dirname(os.path.abspath(__file__))
+
+
+abs_all_links = __dir__ + "data/universities_world.json"
+uni_links = readFile(abs_all_links)
+
+abs_unis_all_links = __dir__ + "data/unis_all_links.json"
+print(abs_unis_all_links)
+unis_all_links = readFile(abs_unis_all_links)
 
 
 def get_links(base_url, detail_url, session, unis_all_links, recursion_depth):

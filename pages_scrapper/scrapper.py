@@ -29,7 +29,7 @@ headers = {
 
 relat_all_links = "data/universities_world.json"
 unis_all_links = os.path.abspath(relat_all_links)
-# print(unis_all_links)
+print(unis_all_links)
 uni_links = readFile(unis_all_links)
 
 relat_unis_all_links = "data/unis_all_links.json"
@@ -165,8 +165,8 @@ try:
     session.adapters.DEFAULT_RETRIES = 3
 
     for uni in uni_links:
-        # base_url = uni_links[uni]
-        base_url = "https://www.intec.edu.do"
+        base_url = uni_links[uni]
+        # base_url = "https://www.intec.edu.do"
         # base_url = "https://aab-edu.net/"
         if base_url not in unis_all_links:
             unis_all_links[base_url] = []
@@ -176,7 +176,7 @@ try:
 
         print("Finished with " + base_url)
 
-        break
+        # break
 
 
 except Exception as e:

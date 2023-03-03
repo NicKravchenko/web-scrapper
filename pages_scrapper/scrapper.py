@@ -29,6 +29,7 @@ headers = {
 
 relat_all_links = "data/universities_world.json"
 unis_all_links = os.path.abspath(relat_all_links)
+# print(unis_all_links)
 uni_links = readFile(unis_all_links)
 
 relat_unis_all_links = "data/unis_all_links.json"

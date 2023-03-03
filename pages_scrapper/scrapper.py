@@ -153,20 +153,20 @@ def decompose_page(url, session):
         # print(links)
 
 
-try:
-    """Start session for retrieving one domain"""
-    session = requests.Session()
-    session.headers.update(
-        {
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3",
-            "Referer": "https://www.google.com/",
-        }
-    )
-    session.verify = cert_path
+"""Start session for retrieving one domain"""
+session = requests.Session()
+session.headers.update(
+    {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3",
+        "Referer": "https://www.google.com/",
+    }
+)
+session.verify = cert_path
 
-    session.adapters.DEFAULT_RETRIES = 3
+session.adapters.DEFAULT_RETRIES = 3
 
-    for uni in uni_links:
+for uni in uni_links:
+    try:
         base_url = uni_links[uni]
         # base_url = "https://www.intec.edu.do"
         # base_url = "https://aab-edu.net/"
@@ -180,11 +180,10 @@ try:
 
         # break
 
-
-except Exception as e:
-    print("Closed with error:")
-    print(e)
-    e.with_traceback(None)
-    print(arg for arg in e.args)
+    except Exception as e:
+        print("Closed with error:")
+        print(e)
+        e.with_traceback(None)
+        print(arg for arg in e.args)
 
     pass

@@ -103,7 +103,7 @@ def get_links(base_url, detail_url, session, unis_all_links, recursion_depth):
 
         unis_all_links[base_url].append(composed_url)
 
-        writeFile("data/unis_all_links.json", unis_all_links)
+        writeFile(__dir__ + "/data/unis_all_links.json", unis_all_links)
         print(bcolors.OKGREEN + "Was saved " + composed_url + bcolors.ENDC)
         print(
             "Amount: "
@@ -174,7 +174,7 @@ try:
             unis_all_links[base_url] = []
 
         get_links(base_url, "", session, unis_all_links, 0)
-        writeFile("data/unis_all_links.json", unis_all_links)
+        writeFile(__dir__ + "/data/unis_all_links.json", unis_all_links)
 
         print("Finished with " + base_url)
 

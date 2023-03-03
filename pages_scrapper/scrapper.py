@@ -31,10 +31,10 @@ headers = {
 __dir__ = os.path.dirname(os.path.abspath(__file__))
 
 
-abs_all_links = __dir__ + "data/universities_world.json"
+abs_all_links = __dir__ + "/data/universities_world.json"
 uni_links = readFile(abs_all_links)
 
-abs_unis_all_links = __dir__ + "data/unis_all_links.json"
+abs_unis_all_links = __dir__ + "/data/unis_all_links.json"
 print(abs_unis_all_links)
 unis_all_links = readFile(abs_unis_all_links)
 

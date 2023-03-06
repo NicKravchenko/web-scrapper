@@ -35,7 +35,6 @@ abs_all_links = __dir__ + "/data/universities_world_124.json"
 uni_links = readFile(abs_all_links)
 
 abs_unis_all_links = __dir__ + "/data/unis_all_links.json"
-print(abs_unis_all_links)
 unis_all_links = readFile(abs_unis_all_links)
 
 abs_links_folder = __dir__ + "/data/links/"
@@ -52,7 +51,6 @@ def get_links(
     """Get rid of http or https"""
     response = None
     uni = readFile(uni_file_path)
-    print(uni[base_url])
     if ("http://" in detail_url) or ("https://" in detail_url):
         url = detail_url
     else:
@@ -120,16 +118,19 @@ def get_links(
 
         writeFile(uni_file_path, uni)
         print(bcolors.OKGREEN + "Was saved " + composed_url + bcolors.ENDC)
+
         print(
             "Amount: "
             + str(len(uni[base_url]))
             + " depth "
             + str(recursion_depth)
         )
+
         if (len(uni[base_url]) > MAX_PER_UNI) or (
             recursion_depth > MAX_RECURTION_DEPTH
         ):
             continue
+
         get_links(
             base_url,
             href,
@@ -165,7 +166,7 @@ def process_data(universities_links):
                 fileObject.close()
             except Exception as e:
                 print("File already exists")
-                print(e)
+                print("Error " + e)
 
             if os.path.getsize(uni_file_path) == 0:
                 with open(uni_file_path, "w") as file:
@@ -188,7 +189,7 @@ def process_data(universities_links):
 
 
 if __name__ == "__main__":
-    num_processes = 10
+    num_processes = 50
     data_parts = [
         list(uni_links)[i::num_processes] for i in range(num_processes)
     ]

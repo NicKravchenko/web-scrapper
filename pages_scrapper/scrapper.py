@@ -190,7 +190,7 @@ def process_data(universities_links):
 
 
 if __name__ == "__main__":
-    num_processes = 30
+    num_processes = 25
     data_parts = [
         list(uni_links)[i::num_processes] for i in range(num_processes)
     ]

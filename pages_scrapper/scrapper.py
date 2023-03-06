@@ -166,7 +166,8 @@ def process_data(universities_links):
                 fileObject.close()
             except Exception as e:
                 print("File already exists")
-                print("Error " + e)
+                print("Error on open file")
+                print(e)
 
             if os.path.getsize(uni_file_path) == 0:
                 with open(uni_file_path, "w") as file:
@@ -189,7 +190,7 @@ def process_data(universities_links):
 
 
 if __name__ == "__main__":
-    num_processes = 50
+    num_processes = 30
     data_parts = [
         list(uni_links)[i::num_processes] for i in range(num_processes)
     ]

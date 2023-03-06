@@ -2,7 +2,7 @@ import requests
 import urllib.parse
 
 from bs4 import BeautifulSoup
-import io, json, os, sys
+import os, multiprocessing
 from helper_functions import (
     readFile,
     writeFile,
@@ -12,7 +12,7 @@ from helper_functions import (
     not_allowed_links,
 )
 
-MAX_PER_UNI = 350
+MAX_PER_UNI = 150
 MAX_RECURTION_DEPTH = 20
 # data_intec_json = "data/intec.json"
 # absolute_path_intec_json = os.path.abspath(data_intec_json)
@@ -31,18 +31,28 @@ headers = {
 __dir__ = os.path.dirname(os.path.abspath(__file__))
 
 
-abs_all_links = __dir__ + "/data/universities_world.json"
+abs_all_links = __dir__ + "/data/universities_world_124.json"
 uni_links = readFile(abs_all_links)
 
 abs_unis_all_links = __dir__ + "/data/unis_all_links.json"
 print(abs_unis_all_links)
 unis_all_links = readFile(abs_unis_all_links)
 
+abs_links_folder = __dir__ + "/data/links/"
 
-def get_links(base_url, detail_url, session, unis_all_links, recursion_depth):
+
+def get_links(
+    base_url,
+    detail_url,
+    session,
+    unis_all_links,
+    recursion_depth,
+    uni_file_path,
+):
     """Get rid of http or https"""
     response = None
-
+    uni = readFile(uni_file_path)
+    print(uni[base_url])
     if ("http://" in detail_url) or ("https://" in detail_url):
         url = detail_url
     else:
@@ -50,7 +60,7 @@ def get_links(base_url, detail_url, session, unis_all_links, recursion_depth):
 
     url = urllib.parse.quote(url, safe=":/")
 
-    url_no_http = return_clean_link(url)
+    # url_no_http = return_clean_link(url)
 
     try:
         response = session.get(url, timeout=10)
@@ -91,7 +101,7 @@ def get_links(base_url, detail_url, session, unis_all_links, recursion_depth):
             # Ignore any errors and continue to the next URL
             continue
 
-        if (composed_url in unis_all_links[base_url]) or (
+        if (composed_url in uni[base_url]) or (
             not response_check_if_404
             or response_check_if_404.status_code == 404
         ):
@@ -106,89 +116,90 @@ def get_links(base_url, detail_url, session, unis_all_links, recursion_depth):
             # get_links(base_url, href, session, unis_all_links)
             continue
 
-        unis_all_links[base_url].append(composed_url)
+        uni[base_url].append(composed_url)
 
-        writeFile(__dir__ + "/data/unis_all_links.json", unis_all_links)
+        writeFile(uni_file_path, uni)
         print(bcolors.OKGREEN + "Was saved " + composed_url + bcolors.ENDC)
         print(
             "Amount: "
-            + str(len(unis_all_links[base_url]))
+            + str(len(uni[base_url]))
             + " depth "
             + str(recursion_depth)
         )
-        if (len(unis_all_links[base_url]) > MAX_PER_UNI) or (
+        if (len(uni[base_url]) > MAX_PER_UNI) or (
             recursion_depth > MAX_RECURTION_DEPTH
         ):
             continue
-        get_links(base_url, href, session, unis_all_links, recursion_depth + 1)
+        get_links(
+            base_url,
+            href,
+            session,
+            unis_all_links,
+            recursion_depth + 1,
+            uni_file_path,
+        )
 
 
-def decompose_page(url, session):
-    hList = {}
-    page_text = ""
+def process_data(universities_links):
+    for uni in universities_links:
+        """Start session for retrieving one domain"""
 
-    """Get rid of http or https"""
-    url_no_http = return_clean_link(url)
+        session = requests.Session()
+        session.headers.update(
+            {
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3",
+                "Referer": "https://www.google.com/",
+            }
+        )
+        session.verify = cert_path
+        session.adapters.DEFAULT_RETRIES = 3
+        try:
+            base_url = uni_links[uni]
+            # base_url = "https://www.intec.edu.do"
+            if base_url not in unis_all_links:
+                unis_all_links[base_url] = []
 
-    response = session.get(url)
+            uni_file_path = abs_links_folder + f"/{uni}.json"
+            try:
+                fileObject = open(uni_file_path, "x")
+                fileObject.close()
+            except Exception as e:
+                print("File already exists")
+                print(e)
 
-    if response.status_code == 200:
-        soup = BeautifulSoup(response.content, "html.parser")
+            if os.path.getsize(uni_file_path) == 0:
+                with open(uni_file_path, "w") as file:
+                    file.write('{ "' + base_url + '" : [] }')
+                    file.close()
 
-        text = cleanify_soup_text(soup)
+            base_url = uni_links[uni]
 
-        for a in soup.find_all("a"):
-            href = str(a.get("href"))
-            """Add href only if its relative path or it contains name of page"""
-            if href[:1] == "/":  # or (url_no_http in href):
-                links.append(href)
+            get_links(base_url, "", session, unis_all_links, 0, uni_file_path)
 
-        for i in range(1, 7):
-            hList[i] = []
-            for h in soup.find_all(f"h{i}"):
-                hList[i].append(h.text)
+            print("Finished with " + base_url)
 
-        # intec_json[url] = {}
-        # intec_json[url]["header"] = hList
+        except Exception as e:
+            print("Closed with error:")
+            print(e)
+            e.with_traceback(None)
+            print(arg for arg in e.args)
 
-        # intec_json[url]["body"] = text
-
-        # print(text)
-        # print(intec_json)
-        # print(links)
+            pass
 
 
-"""Start session for retrieving one domain"""
-session = requests.Session()
-session.headers.update(
-    {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3",
-        "Referer": "https://www.google.com/",
-    }
-)
-session.verify = cert_path
+if __name__ == "__main__":
+    num_processes = 10
+    data_parts = [
+        list(uni_links)[i::num_processes] for i in range(num_processes)
+    ]
 
-session.adapters.DEFAULT_RETRIES = 3
+    processes = []
+    for i, data_part in enumerate(data_parts):
+        results_file = f"results_{i}.json"
+        p = multiprocessing.Process(target=process_data, args=(data_part,))
+        processes.append(p)
+        p.start()
 
-for uni in uni_links:
-    try:
-        base_url = uni_links[uni]
-        # base_url = "https://www.intec.edu.do"
-        # base_url = "https://aab-edu.net/"
-        if base_url not in unis_all_links:
-            unis_all_links[base_url] = []
-
-        get_links(base_url, "", session, unis_all_links, 0)
-        writeFile(__dir__ + "/data/unis_all_links.json", unis_all_links)
-
-        print("Finished with " + base_url)
-
-        # break
-
-    except Exception as e:
-        print("Closed with error:")
-        print(e)
-        e.with_traceback(None)
-        print(arg for arg in e.args)
-
-        pass
+    # Wait for all processes to finish
+    for p in processes:
+        p.join()

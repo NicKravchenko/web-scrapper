@@ -12,7 +12,7 @@ from helper_functions import (
     not_allowed_links,
 )
 
-MAX_PER_UNI = 150
+MAX_PER_UNI = 75
 MAX_RECURTION_DEPTH = 20
 # data_intec_json = "data/intec.json"
 # absolute_path_intec_json = os.path.abspath(data_intec_json)

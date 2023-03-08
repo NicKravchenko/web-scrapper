@@ -12,15 +12,13 @@ from helper_functions import (
     not_allowed_links,
 )
 
-MAX_PER_UNI = 75
+MAX_PER_UNI = 45
 MAX_RECURTION_DEPTH = 20
-# data_intec_json = "data/intec.json"
-# absolute_path_intec_json = os.path.abspath(data_intec_json)
-
-# intec_json = readFile("data/intec.json")
+NUMBER_PROCESS = 27
+LOWER_ARRAY_ELEMENT = 350
+HIGHER_ARRAY_ELEMENT = 600
 
 cert_path = "/etc/ssl/certs/ca-certificates.crt"
-# cert_path = "C:/Users/Nikita/AppData/Local/Programs/Python/Python311/lib/site-packages/certifi/cacert.pem"
 
 headers = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3",
@@ -31,7 +29,7 @@ headers = {
 __dir__ = os.path.dirname(os.path.abspath(__file__))
 
 
-abs_all_links = __dir__ + "/data/universities_world_124.json"
+abs_all_links = __dir__ + "/data/universities_world.json"
 uni_links = readFile(abs_all_links)
 
 abs_unis_all_links = __dir__ + "/data/unis_all_links.json"
@@ -190,9 +188,14 @@ def process_data(universities_links):
 
 
 if __name__ == "__main__":
-    num_processes = 25
+    num_processes = NUMBER_PROCESS
+    unis_to_use = {
+        k: uni_links[k]
+        for k in list(uni_links)[LOWER_ARRAY_ELEMENT:HIGHER_ARRAY_ELEMENT]
+    }
+
     data_parts = [
-        list(uni_links)[i::num_processes] for i in range(num_processes)
+        list(unis_to_use)[i::num_processes] for i in range(num_processes)
     ]
 
     processes = []

@@ -11,14 +11,16 @@ from helper_functions import (
     bcolors,
     not_allowed_links,
 )
+from data_extractor import process_data as process_data_pages_extractor
 
 MAX_PER_UNI = 45
 MAX_RECURTION_DEPTH = 20
-NUMBER_PROCESS = 27
-LOWER_ARRAY_ELEMENT = 350
-HIGHER_ARRAY_ELEMENT = 600
+NUMBER_PROCESS = 1  # 27
+LOWER_ARRAY_ELEMENT = 600
+HIGHER_ARRAY_ELEMENT = 1000
 
 cert_path = "/etc/ssl/certs/ca-certificates.crt"
+cert_path = "C:/Users/Nikita/AppData/Local/Programs/Python/Python311/lib/site-packages/certifi/cacert.pem"
 
 headers = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3",
@@ -56,13 +58,9 @@ def get_links(
 
     url = urllib.parse.quote(url, safe=":/")
 
-    # url_no_http = return_clean_link(url)
-
     try:
         response = session.get(url, timeout=10)
-        # Process the response here...
     except requests.exceptions.RequestException:
-        # Ignore any errors and continue to the next URL
         pass
 
     if not response or response.status_code != 200:
@@ -92,9 +90,7 @@ def get_links(
 
         try:
             response_check_if_404 = session.get(composed_url, timeout=20)
-            # Process the response here...
         except requests.exceptions.RequestException:
-            # Ignore any errors and continue to the next URL
             continue
 
         if (composed_url in uni[base_url]) or (
@@ -109,7 +105,6 @@ def get_links(
                 + detail_url
                 + bcolors.ENDC
             )
-            # get_links(base_url, href, session, unis_all_links)
             continue
 
         uni[base_url].append(composed_url)
@@ -187,7 +182,7 @@ def process_data(universities_links):
             pass
 
 
-if __name__ == "__main__":
+def runLinkScrapper():
     num_processes = NUMBER_PROCESS
     unis_to_use = {
         k: uni_links[k]
@@ -200,11 +195,46 @@ if __name__ == "__main__":
 
     processes = []
     for i, data_part in enumerate(data_parts):
-        results_file = f"results_{i}.json"
         p = multiprocessing.Process(target=process_data, args=(data_part,))
         processes.append(p)
         p.start()
 
-    # Wait for all processes to finish
     for p in processes:
         p.join()
+
+
+def runDataExtractor():
+    num_processes = NUMBER_PROCESS
+
+    for i in list(unis_all_links):
+        session = requests.Session()
+        session.headers.update(
+            {
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3",
+                "Referer": "https://www.google.com/",
+            }
+        )
+        session.verify = cert_path
+        session.adapters.DEFAULT_RETRIES = 3
+
+        unis_to_use = unis_all_links[i]
+
+        data_parts = [
+            list(unis_to_use)[i::num_processes] for i in range(num_processes)
+        ]
+
+        processes = []
+        for i, data_part in enumerate(data_parts):
+            p = multiprocessing.Process(
+                target=process_data_pages_extractor, args=(data_part, session)
+            )
+
+            processes.append(p)
+            p.start()
+
+        for p in processes:
+            p.join()
+
+
+if __name__ == "__main__":
+    runDataExtractor()

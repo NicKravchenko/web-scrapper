@@ -10,17 +10,18 @@ from helper_functions import (
     cleanify_soup_text,
     bcolors,
     not_allowed_links,
+    remove_special_chars,
 )
 from data_extractor import process_data as process_data_pages_extractor
 
-MAX_PER_UNI = 45
-MAX_RECURTION_DEPTH = 20
-NUMBER_PROCESS = 1  # 27
-LOWER_ARRAY_ELEMENT = 600
-HIGHER_ARRAY_ELEMENT = 1000
+MAX_PER_UNI = 30
+MAX_RECURTION_DEPTH = 15
+NUMBER_PROCESS = 27
+LOWER_ARRAY_ELEMENT = 1000
+HIGHER_ARRAY_ELEMENT = 1300
 
 cert_path = "/etc/ssl/certs/ca-certificates.crt"
-cert_path = "C:/Users/Nikita/AppData/Local/Programs/Python/Python311/lib/site-packages/certifi/cacert.pem"
+# cert_path = "C:/Users/Nikita/AppData/Local/Programs/Python/Python311/lib/site-packages/certifi/cacert.pem"
 
 headers = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3",
@@ -137,7 +138,7 @@ def get_links(
 def process_data(universities_links):
     for uni in universities_links:
         """Start session for retrieving one domain"""
-
+        uni = remove_special_chars(uni)
         session = requests.Session()
         session.headers.update(
             {
@@ -237,4 +238,5 @@ def runDataExtractor():
 
 
 if __name__ == "__main__":
-    runDataExtractor()
+    # runDataExtractor()
+    runLinkScrapper()

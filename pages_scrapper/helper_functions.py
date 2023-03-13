@@ -1,6 +1,18 @@
 import json, re
 
 
+def remove_special_chars(text) -> str:
+    text = re.sub(r"\\.", "", text)
+    # Remove quotes
+    text = re.sub(r'[\'"]', "", text)
+    # Remove other special characters
+    text = re.sub(r"[^\w\s]+", "", text)
+    # Remove whitespace
+    text = re.sub(r"\s+", " ", text)
+    # Return cleaned text
+    return text.strip()
+
+
 def readFile(route):
     fileObject = open(route, "r")
     jsonContent = fileObject.read()

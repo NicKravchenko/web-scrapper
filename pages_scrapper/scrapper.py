@@ -72,9 +72,9 @@ def get_links(
     for a in soup.find_all("a"):
         href = str(a.get("href"))
         """Add href only if its relative path or it contains name of page"""
-        if not (
-            href[:1] == "/" or ("http://" in href) or ("https://" in href)
-        ) or (any(ext in href for ext in not_allowed_links)):
+        if not (href[:1] == "/" or ("http://" in href) or ("https://" in href)) or (
+            any(ext in href for ext in not_allowed_links)
+        ):
             continue
 
         composed_url = base_url + href
@@ -95,8 +95,7 @@ def get_links(
             continue
 
         if (composed_url in uni[base_url]) or (
-            not response_check_if_404
-            or response_check_if_404.status_code == 404
+            not response_check_if_404 or response_check_if_404.status_code == 404
         ):
             print(
                 bcolors.WARNING
@@ -113,12 +112,7 @@ def get_links(
         writeFile(uni_file_path, uni)
         print(bcolors.OKGREEN + "Was saved " + composed_url + bcolors.ENDC)
 
-        print(
-            "Amount: "
-            + str(len(uni[base_url]))
-            + " depth "
-            + str(recursion_depth)
-        )
+        print("Amount: " + str(len(uni[base_url])) + " depth " + str(recursion_depth))
 
         if (len(uni[base_url]) > MAX_PER_UNI) or (
             recursion_depth > MAX_RECURTION_DEPTH
@@ -190,9 +184,7 @@ def runLinkScrapper():
         for k in list(uni_links)[LOWER_ARRAY_ELEMENT:HIGHER_ARRAY_ELEMENT]
     }
 
-    data_parts = [
-        list(unis_to_use)[i::num_processes] for i in range(num_processes)
-    ]
+    data_parts = [list(unis_to_use)[i::num_processes] for i in range(num_processes)]
 
     processes = []
     for i, data_part in enumerate(data_parts):
@@ -207,34 +199,44 @@ def runLinkScrapper():
 def runDataExtractor():
     num_processes = NUMBER_PROCESS
 
-    for i in list(unis_all_links):
-        session = requests.Session()
-        session.headers.update(
-            {
-                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3",
-                "Referer": "https://www.google.com/",
-            }
-        )
-        session.verify = cert_path
-        session.adapters.DEFAULT_RETRIES = 3
+    for filename in os.listdir(abs_links_folder):
+        if not filename.endswith(".json"):
+            continue
 
-        unis_to_use = unis_all_links[i]
+        data = readFile(abs_links_folder + filename)
 
-        data_parts = [
-            list(unis_to_use)[i::num_processes] for i in range(num_processes)
-        ]
+        # Convert the dictionary into a list and access the array using its index position
+        array_index = 0  # Set the index position of the array
+        array = list(data.values())[array_index]
 
-        processes = []
-        for i, data_part in enumerate(data_parts):
-            p = multiprocessing.Process(
-                target=process_data_pages_extractor, args=(data_part, session)
+        for i in list(array):
+            session = requests.Session()
+            session.headers.update(
+                {
+                    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3",
+                    "Referer": "https://www.google.com/",
+                }
             )
+            session.verify = cert_path
+            session.adapters.DEFAULT_RETRIES = 3
 
-            processes.append(p)
-            p.start()
+            unis_to_use = unis_all_links[i]
 
-        for p in processes:
-            p.join()
+            data_parts = [
+                list(unis_to_use)[i::num_processes] for i in range(num_processes)
+            ]
+
+            processes = []
+            for i, data_part in enumerate(data_parts):
+                p = multiprocessing.Process(
+                    target=process_data_pages_extractor, args=(data_part, session)
+                )
+
+                processes.append(p)
+                p.start()
+
+            for p in processes:
+                p.join()
 
 
 if __name__ == "__main__":

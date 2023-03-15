@@ -22,7 +22,6 @@ def getHtml(url, session):
     if not response or response.status_code != 200:
         print(bcolors.FAIL + "Error on consuming: " + url + bcolors.ENDC)
         return
-    print(response.text)
     return response.text
 
 
@@ -34,16 +33,56 @@ def extract_data_from_page(page):
         heading.text
         for heading in soup.find_all(["h1", "h2", "h3", "h4", "h5", "h6"])
     ]
-    text = soup.get_text()
+    # text = soup.text
+    text = cleanify_soup_text(soup)
 
-    print(headings)
-    print(text)
 
+    return headings, text
     # return title, text
+
+def createFile(name):
+    loc = __dir__ + f"/data/pages_content/{name}"
+
+    try:
+        fileObject = open(loc, "x")
+        fileObject.close()
+    except Exception as e:
+        print("File already exists")
+        print("Error on open file")
+        print(e)
+
+    if os.path.getsize(loc) == 0:
+        with open(loc, "w") as file:
+            file.write('{ }')
+            file.close()
+
+def addPage(route, file, url, headings, text):
+    file[url] = {
+        "headings" : headings,
+        "body" : text,
+    }
+    # file[url]["headings"] = headings
+    writeFile(route, file)
+    print(file)
 
 
 def process_data(data_part, session):
-    for data in data_part:
-        page = getHtml(data, session)
+    a = 1
+    current_a = a
+    base_route = __dir__ + f"/data/pages_content/"
+    route = base_route + str(a)
 
-        extract_data_from_page(page)
+    for url in data_part:
+        current_a = a
+        if a==1 or a % 200==0:
+            createFile(a)
+            current_a = a
+            route = base_route + str(a)
+            file = readFile(route)
+        a += 1
+
+        page = getHtml(url, session)
+
+        headings, text = extract_data_from_page(page)
+
+        addPage(route, file, url, headings, text)

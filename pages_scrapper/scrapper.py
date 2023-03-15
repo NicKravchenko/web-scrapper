@@ -16,12 +16,12 @@ from data_extractor import process_data as process_data_pages_extractor
 
 MAX_PER_UNI = 30
 MAX_RECURTION_DEPTH = 15
-NUMBER_PROCESS = 27
+NUMBER_PROCESS = 1
 LOWER_ARRAY_ELEMENT = 1000
 HIGHER_ARRAY_ELEMENT = 1300
 
-cert_path = "/etc/ssl/certs/ca-certificates.crt"
-# cert_path = "C:/Users/Nikita/AppData/Local/Programs/Python/Python311/lib/site-packages/certifi/cacert.pem"
+# cert_path = "/etc/ssl/certs/ca-certificates.crt"
+cert_path = "C:/Users/nickr/AppData/Local/Programs/Python/Python311/lib/site-packages/certifi/cacert.pem"
 
 headers = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3",
@@ -238,5 +238,5 @@ def runDataExtractor():
 
 
 if __name__ == "__main__":
-    # runDataExtractor()
-    runLinkScrapper()
+    runDataExtractor()
+    # runLinkScrapper()

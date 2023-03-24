@@ -203,4 +203,18 @@ not_allowed_links = [
     "walmart",
     "target",
     "craigslist",
+    "gob",
+    "moodle",
+    "creativecommons",
+    "atlassian",
+    "wordpress",
+    "wix",
+    "squarespace",
+    "shopify",
+    "instructure",
+    "blackboard",
+    "canvas",
+    "moodle",
+    "microsoft",
+
 ]

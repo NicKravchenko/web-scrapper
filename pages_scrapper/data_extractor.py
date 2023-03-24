@@ -13,7 +13,7 @@ uni_links = readFile(abs_all_links)
 
 def getHtml(url, session):
     url = urllib.parse.quote(url, safe=":/")
-
+    response = None
     try:
         response = session.get(url, timeout=10)
     except requests.exceptions.RequestException:
@@ -26,17 +26,24 @@ def getHtml(url, session):
 
 
 def extract_data_from_page(page):
-    soup = BeautifulSoup(page, "html.parser")
-    # title = soup.title.string
-    # text = cleanify_soup_text(soup)
-    headings = [
-        heading.text for heading in soup.find_all(["h1", "h2", "h3", "h4", "h5", "h6"])
-    ]
-    # text = soup.text
-    text = cleanify_soup_text(soup)
+    try:
+        soup = BeautifulSoup(page, "html.parser")
+        # title = soup.title.string
+        # text = cleanify_soup_text(soup)
+        title = soup.title.string if soup.title else "No title"
 
-    return headings, text
-    # return title, text
+        headings = [
+            heading.text for heading in soup.find_all(["h1", "h2", "h3", "h4", "h5", "h6"])
+        ]
+        # text = soup.text
+        text = cleanify_soup_text(soup)
+
+        return title, headings, text
+        # return title, text
+    except Exception as e:
+        print("Error on extracting data from page")
+        print(e)
+        return "None", ["None"], "None"
 
 
 def createFile(name):
@@ -56,8 +63,9 @@ def createFile(name):
             file.close()
 
 
-def addPage(route, file, url, headings, text):
+def addPage(route, file, url, title, headings, text):
     file[url] = {
+        "title": title,
         "headings": headings,
         "body": text,
     }
@@ -87,5 +95,5 @@ def process_data(data_part, session):
             continue
 
         page = getHtml(url, session)
-        headings, text = extract_data_from_page(page)
-        addPage(route, file, url, headings, text)
+        title, headings, text = extract_data_from_page(page)
+        addPage(route, file, url, title, headings, text)

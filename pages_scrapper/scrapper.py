@@ -14,12 +14,11 @@ from helper_functions import (
 )
 from data_extractor import process_data as process_data_pages_extractor
 
-MAX_PER_UNI = 30
-MAX_RECURTION_DEPTH = 15
+MAX_PER_UNI = 500
+MAX_RECURTION_DEPTH = 1
 NUMBER_PROCESS = 1
-LOWER_ARRAY_ELEMENT = 1000
-HIGHER_ARRAY_ELEMENT = 1300
-
+LOWER_ARRAY_ELEMENT = 0
+HIGHER_ARRAY_ELEMENT = 11
 # cert_path = "/etc/ssl/certs/ca-certificates.crt"
 cert_path = "C:/Users/nickr/AppData/Local/Programs/Python/Python311/lib/site-packages/certifi/cacert.pem"
 
@@ -32,7 +31,7 @@ headers = {
 __dir__ = os.path.dirname(os.path.abspath(__file__))
 
 
-abs_all_links = __dir__ + "/data/universities_world.json"
+abs_all_links = __dir__ + "/data/universities_rd.json"
 uni_links = readFile(abs_all_links)
 
 abs_unis_all_links = __dir__ + "/data/unis_all_links.json"
@@ -179,6 +178,7 @@ def process_data(universities_links):
 
 def runLinkScrapper():
     num_processes = NUMBER_PROCESS
+
     unis_to_use = {
         k: uni_links[k]
         for k in list(uni_links)[LOWER_ARRAY_ELEMENT:HIGHER_ARRAY_ELEMENT]
@@ -205,38 +205,44 @@ def runDataExtractor():
 
         data = readFile(abs_links_folder + filename)
 
-        # Convert the dictionary into a list and access the array using its index position
-        array_index = 0  # Set the index position of the array
-        array = list(data.values())[array_index]
+        try:
+            # Convert the dictionary into a list and access the array using its index position
+            array_index = 0  # Set the index position of the array
+            unis_to_use = list(data.values())[array_index]
+        except Exception as e:
+            print("Error:")
+            print(e)
+            continue
 
-        for i in list(array):
-            session = requests.Session()
-            session.headers.update(
-                {
-                    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3",
-                    "Referer": "https://www.google.com/",
-                }
+
+        # for i in list(array):
+        session = requests.Session()
+        session.headers.update(
+            {
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3",
+                "Referer": "https://www.google.com/",
+            }
+        )
+        session.verify = cert_path
+        session.adapters.DEFAULT_RETRIES = 3
+
+        # print(i)
+
+        data_parts = [
+            list(unis_to_use)[i::num_processes] for i in range(num_processes)
+        ]
+
+        processes = []
+        for i, data_part in enumerate(data_parts):
+            p = multiprocessing.Process(
+                target=process_data_pages_extractor, args=(data_part, session)
             )
-            session.verify = cert_path
-            session.adapters.DEFAULT_RETRIES = 3
 
-            unis_to_use = unis_all_links[i]
+            processes.append(p)
+            p.start()
 
-            data_parts = [
-                list(unis_to_use)[i::num_processes] for i in range(num_processes)
-            ]
-
-            processes = []
-            for i, data_part in enumerate(data_parts):
-                p = multiprocessing.Process(
-                    target=process_data_pages_extractor, args=(data_part, session)
-                )
-
-                processes.append(p)
-                p.start()
-
-            for p in processes:
-                p.join()
+        for p in processes:
+            p.join()
 
 
 if __name__ == "__main__":

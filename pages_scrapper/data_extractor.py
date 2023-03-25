@@ -33,7 +33,8 @@ def extract_data_from_page(page):
         title = soup.title.string if soup.title else "No title"
 
         headings = [
-            heading.text for heading in soup.find_all(["h1", "h2", "h3", "h4", "h5", "h6"])
+            heading.text
+            for heading in soup.find_all(["h1", "h2", "h3", "h4", "h5", "h6"])
         ]
         # text = soup.text
         text = cleanify_soup_text(soup)
@@ -74,21 +75,15 @@ def addPage(route, file, url, title, headings, text):
     print(file)
 
 
-def process_data(data_part, session):
-    a = 1
-    current_a = a
-    base_route = __dir__ + f"/data/pages_content/"
-    route = base_route + str(a) + ".json"
-    file = None
+def process_data(data_part, session, file_name):
 
+    base_route = __dir__ + "/data/pages_content/"
+    route = base_route + str(file_name) + ".json"
+    fileName = str(file_name) + ".json"
+    createFile(fileName)
+
+    file = readFile(route)
     for url in data_part:
-        if a == 1 or a % 200 == 0:
-            fileName = str(a) + ".json"
-            createFile(fileName)
-            current_a = a
-            route = base_route + fileName
-            file = readFile(route)
-        a += 1
 
         if url in file:
             print("Site is there")

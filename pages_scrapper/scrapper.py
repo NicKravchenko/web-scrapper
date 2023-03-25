@@ -2,12 +2,11 @@ import requests
 import urllib.parse
 
 from bs4 import BeautifulSoup
-import os, multiprocessing
+import os
+import multiprocessing
 from helper_functions import (
     readFile,
     writeFile,
-    return_clean_link,
-    cleanify_soup_text,
     bcolors,
     not_allowed_links,
     remove_special_chars,
@@ -23,7 +22,8 @@ HIGHER_ARRAY_ELEMENT = 11
 cert_path = "C:/Users/nickr/AppData/Local/Programs/Python/Python311/lib/site-packages/certifi/cacert.pem"
 
 headers = {
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3",
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
+    + "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3",
     "Referer": "https://www.google.com/",
 }
 
@@ -135,7 +135,8 @@ def process_data(universities_links):
         session = requests.Session()
         session.headers.update(
             {
-                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3",
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
+                + "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3",
                 "Referer": "https://www.google.com/",
             }
         )
@@ -198,6 +199,8 @@ def runLinkScrapper():
 
 def runDataExtractor():
     num_processes = NUMBER_PROCESS
+    link_counter = 0
+    file_name = 1
 
     for filename in os.listdir(abs_links_folder):
         if not filename.endswith(".json"):
@@ -214,12 +217,12 @@ def runDataExtractor():
             print(e)
             continue
 
-
         # for i in list(array):
         session = requests.Session()
         session.headers.update(
             {
-                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3",
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
+                + "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3",
                 "Referer": "https://www.google.com/",
             }
         )
@@ -227,15 +230,18 @@ def runDataExtractor():
         session.adapters.DEFAULT_RETRIES = 3
 
         # print(i)
+        link_counter += len(unis_to_use)
+        if link_counter > 800:
+            file_name += 1
+            link_counter = 0
 
-        data_parts = [
-            list(unis_to_use)[i::num_processes] for i in range(num_processes)
-        ]
+        data_parts = [list(unis_to_use)[i::num_processes] for i in range(num_processes)]
 
         processes = []
         for i, data_part in enumerate(data_parts):
             p = multiprocessing.Process(
-                target=process_data_pages_extractor, args=(data_part, session)
+                target=process_data_pages_extractor,
+                args=(data_part, session, file_name),
             )
 
             processes.append(p)

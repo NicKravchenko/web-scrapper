@@ -1,4 +1,5 @@
-import json, re
+import json
+import re
 
 
 def remove_special_chars(text) -> str:
@@ -216,5 +217,4 @@ not_allowed_links = [
     "canvas",
     "moodle",
     "microsoft",
-
 ]

@@ -31,8 +31,9 @@ headers = {
 __dir__ = os.path.dirname(os.path.abspath(__file__))
 
 
-abs_all_links = __dir__ + "/data/universities_rd.json"
-uni_links = readFile(abs_all_links)
+abs_all_links = __dir__ + "/data/links/"
+# abs_domis = __dir__ + "/data/universities_rd.json"
+# uni_links = readFile(abs_all_links)
 
 abs_unis_all_links = __dir__ + "/data/unis_all_links.json"
 unis_all_links = readFile(abs_unis_all_links)
@@ -198,7 +199,7 @@ def runLinkScrapper():
 
 
 def runDataExtractor():
-    num_processes = NUMBER_PROCESS
+    num_processes = 1
     link_counter = 0
     file_name = 1
 
